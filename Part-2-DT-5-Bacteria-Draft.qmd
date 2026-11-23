@@ -1,6 +1,6 @@
 ---
 title: "Burtin's Bacteria"
-author: "Your Name"
+author: "Theresa Louise Binnings"
 format:
   html:
     embed-resources: true
@@ -15,6 +15,9 @@ execute:
 #| include: false
 
 library(tidyverse)
+library(plotly)
+library(ggiraph)
+library(patchwork)
 ```
 
 ## Burtin's Bacteria
@@ -76,3 +79,146 @@ Consider adding annotations to your visualizations and dashboards to help clarif
 #esquisse::esquisser(data) remember you can use this to get started but you will need to make some more adjustments
 #BE CAREFUL - the default geometry esquisse chooses are not always correct or best!
 ```
+
+
+
+### Scatterplot
+
+```{r}
+#| title: Bacteria graph
+
+
+graph1  <- ggplot(data = antibio_long, 
+                       aes(y = BacteriaAbbr, 
+                           colour = Antibiotic)) +
+  geom_point(aes(x = MIC), position = position_dodge(width = 1)) +
+  geom_linerange(aes(xmin = 0.00000002, xmax = MIC), position = position_dodge(width = 1), linewidth = 1) +
+  scale_color_manual(values = c("darkorange","purple","cyan4")) +
+  scale_x_continuous(trans = "log") +
+  labs(title = "Bacteria",
+       subtitle = "",
+       x = "",
+       y = "",
+       color = "",
+       shape = "") +
+  theme(legend.position = c(0.2, 0.7),
+        plot.title.position = "plot",
+        plot.caption = element_text(hjust = 0, face= "italic"),
+        plot.caption.position = "plot") +
+  theme_minimal()
+
+#add interactivity
+ggplotly(graph1)
+```
+
+## Column {width="50%"}
+
+### Chart 2
+
+Could also add some text here...
+
+```{r}
+#| title: Flipper Length by Species
+
+#this code comes directly from the PalmerPenguins R package documentation https://allisonhorst.github.io/palmerpenguins/articles/examples.html
+
+flipper_box <- ggplot(data = penguins, aes(x = species, y = flipper_length_mm)) +
+  geom_boxplot(aes(color = species), width = 0.3, show.legend = FALSE) +
+  geom_jitter(aes(color = species), alpha = 0.5, show.legend = FALSE, position = position_jitter(width = 0.2, seed = 0)) +
+  scale_color_manual(values = c("darkorange","purple","cyan4")) +
+  labs(x = "Species",
+       y = "Flipper length (mm)")
+
+#add interactivity
+ggplotly(flipper_box)
+```
+
+### Text beyween charts
+
+This chart shows a more sophisticated tool tip with custom labels.
+
+### Chart 3
+
+
+```{r}
+#| title: Flipper Length by Species
+
+#create custom labels for each point
+#the <br> says to put the next text on a new line
+penguins <- penguins |>
+  mutate(mylabel = paste("Species:", species,
+                         "<br>Flipper length (mm):", flipper_length_mm,
+                         "<br>Bill length (mm):", bill_length_mm,
+                         "<br>Island:", island))
+
+#this code comes directly from the PalmerPenguins R package documentation https://allisonhorst.github.io/palmerpenguins/articles/examples.html
+
+#to get custom labels to work, we need to map text as an aesthetic
+flipper_bill <- ggplot(data = penguins,
+                         aes(x = flipper_length_mm,
+                             y = bill_length_mm,
+                             text = mylabel)) +
+  geom_point(aes(color = species, 
+                 shape = species),
+             size = 3,
+             alpha = 0.8) +
+  scale_color_manual(values = c("darkorange","purple","cyan4")) +
+  labs(title = "Flipper and bill length",
+       subtitle = "Dimensions for Adelie, Chinstrap and Gentoo Penguins at Palmer Station LTER",
+       x = "Flipper length (mm)",
+       y = "Bill length (mm)",
+       color = "Penguin species",
+       shape = "Penguin species") +
+  theme(legend.position = c(0.85, 0.15),
+        plot.title.position = "plot",
+        plot.caption = element_text(hjust = 0, face= "italic"),
+        plot.caption.position = "plot")
+
+
+#add interactivity with custom tool tip. Cleans up variable names, stops species from repeating twice, and adds in Island information
+ggplotly(flipper_bill, tooltip = c("mylabel"))
+```
+
+# ggiraph examples {orientation="rows"}
+
+Notice the "row" orientation of this dashboard!
+
+## Row
+
+### 
+
+```{r}
+#| title: Highlight Species in Both Scatterplots
+
+#This code comes from https://allisonhorst.github.io/ggiraph-demo/demo.html
+
+#first graph
+p1 <- ggplot(data = penguins, aes(x = flipper_length_mm, 
+                                  y = body_mass_g)) +
+  geom_point_interactive(aes(color = species, 
+                             tooltip = species, 
+                             data_id = species)) +
+  scale_color_manual(values = c("cyan4", "darkorange", "darkorchid4")) +
+  theme_minimal()
+
+#second graph
+p2 <- ggplot(data = penguins, aes(x = bill_depth_mm, 
+                                  y = bill_length_mm)) +
+  geom_point_interactive(aes(color = species, 
+                             tooltip = species, 
+                             data_id = species)) +
+  scale_color_manual(values = c("cyan4", "darkorange", "darkorchid4")) +
+  theme_minimal()
+
+
+#combine graphs with patchwork package (p1 + p2) and make interactive with girafe function
+girafe(ggobj = (p1 + p2), 
+#       width_svg = 8, 
+#       height_svg = 4,
+       options = list(
+         opts_hover(css = "fill: black;"),
+         opts_hover_inv(css = "opacity: 0.1;"),
+         opts_sizing(rescale = FALSE)
+       ))
+```
+
