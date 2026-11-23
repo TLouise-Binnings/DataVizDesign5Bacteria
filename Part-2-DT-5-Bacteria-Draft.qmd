@@ -91,8 +91,8 @@ Consider adding annotations to your visualizations and dashboards to help clarif
 graph1  <- ggplot(data = antibio_long, 
                        aes(y = BacteriaAbbr, 
                            colour = Antibiotic)) +
-  geom_point(aes(x = MIC), position = position_dodge(width = 1)) +
-  geom_linerange(aes(xmin = 0.00000002, xmax = MIC), position = position_dodge(width = 1), linewidth = 1) +
+  geom_point(aes(x = MIC), position = position_dodge(width = 0.6)) +
+  geom_linerange(aes(xmin = 0.00000002, xmax = MIC), position = position_dodge(width = 0.6), linewidth = 0.6) +
   scale_color_manual(values = c("darkorange","purple","cyan4")) +
   scale_x_continuous(trans = "log") +
   labs(title = "Bacteria",
