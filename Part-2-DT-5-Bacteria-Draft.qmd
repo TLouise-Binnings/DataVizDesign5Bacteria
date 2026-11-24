@@ -88,13 +88,36 @@ Consider adding annotations to your visualizations and dashboards to help clarif
 #| title: Bacteria graph
 
 
-graph1  <- ggplot(data = antibio_long, 
-                       aes(y = BacteriaAbbr, 
-                           colour = Antibiotic)) +
-  geom_point(aes(x = MIC), position = position_dodge(width = 0.6)) +
-  geom_linerange(aes(xmin = 0.00000002, xmax = MIC), position = position_dodge(width = 0.6), linewidth = 0.6) +
-  scale_color_manual(values = c("darkorange","purple","cyan4")) +
-  scale_x_continuous(trans = "log") +
+graph1  <- antibio_long |>
+  filter(Gram_Staining == "negative") |>
+  ggplot(aes(y = Bacteria,
+             colour = fct_relevel(Antibiotic, "Penicilin", "Streptom", "Neomycin"))) +
+  geom_point(aes(x = MIC), position = position_dodge(width = 0.7)) +
+  scale_y_discrete(position = "right") +
+  geom_linerange(aes(xmin = 0.00000002, xmax = MIC), position = position_dodge(width = 0.7), linewidth = 0.6) +
+  scale_color_manual(values = c("#C84632","#0A3264","black")) +
+  scale_x_continuous(transform = c("log10", "reverse")) +
+  labs(title = "Bacteria",
+       subtitle = "",
+       x = "",
+       y = "",
+       color = "",
+       shape = "") +
+  theme(legend.position = c(0.2, 0.7),
+        plot.title.position = "plot",
+        plot.caption = element_text(hjust = 0, face= "italic"),
+        plot.caption.position = "plot") +
+  guides(color = "none") +
+  theme_minimal()
+
+graph2  <- antibio_long |> 
+  filter(Gram_Staining == "positive") |>
+  ggplot(aes(y = Bacteria,
+             colour = fct_relevel(Antibiotic, "Penicilin", "Streptom", "Neomycin"))) +
+  geom_point(aes(x = MIC), position = position_dodge(width = 0.7)) +
+  geom_linerange(aes(xmin = 0.00000002, xmax = MIC), position = position_dodge(width = 0.7), linewidth = 0.6) +
+  scale_color_manual(values = c("#C84632","#0A3264","black")) +
+  scale_x_continuous(trans = "log10") +
   labs(title = "Bacteria",
        subtitle = "",
        x = "",
@@ -108,6 +131,7 @@ graph1  <- ggplot(data = antibio_long,
   theme_minimal()
 
 #add interactivity
+ggplotly(graph2)
 ggplotly(graph1)
 ```
 
