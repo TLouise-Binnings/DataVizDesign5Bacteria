@@ -97,9 +97,11 @@ graph1  <- antibio_long |>
              colour = fct_relevel(Antibiotic,  c("Neomycin", "Streptom", "Penicilin")))) +
   geom_point(aes(x = MIC), position = position_dodge(width = 0.6)) +
   scale_y_discrete(position = "right") +
-  geom_linerange(aes(xmin = 0.00000002, xmax = MIC), position = position_dodge(width = 0.6), linewidth = 0.8) +
+  geom_linerange(aes(xmin = 0.0001, xmax = MIC), position = position_dodge(width = 0.6), linewidth = 0.6) +
   scale_color_manual(values = c("#238D8D","#A3D350","#34249C")) +
-  scale_x_continuous(transform = c("log10", "reverse")) +
+  scale_x_continuous(transform = c("log10", "reverse"),
+                     limits =  c(0.0001, 1000),
+                     breaks = c(1000, 100, 10, 1.0, 0.1, 0.01, 0.001)) +
   labs(title = "Bacteria",
        subtitle = "",
        x = "",
@@ -113,14 +115,38 @@ graph1  <- antibio_long |>
         axis.text.y.right = element_text(hjust = 1)) +
   theme_minimal()
 
+graph1
+#add interactivity
+ggplotly(graph1) |>
+  layout(yaxis = list(side = "right"))
+```
+
+## Column {width="50%"}
+
+### Chart 2
+
+Could also add some text here...
+
+```{r}
+#| title: Gram Positive
+
+
 graph2  <- antibio_long |> 
   filter(Gram_Staining == "positive") |>
-  ggplot(aes(y = Bacteria,
+  ggplot(aes(y = fct_relevel(Bacteria, c("Streptococcus viridans",
+"Streptococcus hemolyticus", 
+"Diplococcus pneumoniae",
+"Streptococcus fecalis",
+"Staphylococcus albus",
+"Staphylococcus aureus", 
+"Brucella antracis")),
              colour = fct_relevel(Antibiotic, c("Neomycin", "Streptom", "Penicilin")))) +
   geom_point(aes(x = MIC), position = position_dodge(width = 0.6)) +
-  geom_linerange(aes(xmin = 0.00000002, xmax = MIC), position = position_dodge(width = 0.6), linewidth = 0.6) +
+  geom_linerange(aes(xmin = 0.0001, xmax = MIC), position = position_dodge(width = 0.6), linewidth = 0.6) +
   scale_color_manual(values = c("#238D8D","#A3D350","#34249C")) +
-  scale_x_continuous(trans = "log10") +
+  scale_x_continuous(transform = c("log10"),
+                     limits = c(0.0001, 1000),
+                     breaks = c(0.001, 0.01, 0.1, 1.0, 10, 100, 1000)) +
   labs(title = "Bacteria",
        subtitle = "",
        x = "",
@@ -134,34 +160,8 @@ graph2  <- antibio_long |>
   guides(color = "none") +
   theme_minimal()
 
-
-#graph1
-#add interactivity
 ggplotly(graph2)
-ggplotly(graph1) |>
-  layout(yaxis = list(side = "right"))
-```
 
-## Column {width="50%"}
-
-### Chart 2
-
-Could also add some text here...
-
-```{r}
-#| title: Flipper Length by Species
-
-#this code comes directly from the PalmerPenguins R package documentation https://allisonhorst.github.io/palmerpenguins/articles/examples.html
-
-flipper_box <- ggplot(data = penguins, aes(x = species, y = flipper_length_mm)) +
-  geom_boxplot(aes(color = species), width = 0.3, show.legend = FALSE) +
-  geom_jitter(aes(color = species), alpha = 0.5, show.legend = FALSE, position = position_jitter(width = 0.2, seed = 0)) +
-  scale_color_manual(values = c("darkorange","purple","cyan4")) +
-  labs(x = "Species",
-       y = "Flipper length (mm)")
-
-#add interactivity
-ggplotly(flipper_box)
 ```
 
 ### Text beyween charts
@@ -171,85 +171,4 @@ This chart shows a more sophisticated tool tip with custom labels.
 ### Chart 3
 
 
-```{r}
-#| title: Flipper Length by Species
-
-#create custom labels for each point
-#the <br> says to put the next text on a new line
-penguins <- penguins |>
-  mutate(mylabel = paste("Species:", species,
-                         "<br>Flipper length (mm):", flipper_length_mm,
-                         "<br>Bill length (mm):", bill_length_mm,
-                         "<br>Island:", island))
-
-#this code comes directly from the PalmerPenguins R package documentation https://allisonhorst.github.io/palmerpenguins/articles/examples.html
-
-#to get custom labels to work, we need to map text as an aesthetic
-flipper_bill <- ggplot(data = penguins,
-                         aes(x = flipper_length_mm,
-                             y = bill_length_mm,
-                             text = mylabel)) +
-  geom_point(aes(color = species, 
-                 shape = species),
-             size = 3,
-             alpha = 0.8) +
-  scale_color_manual(values = c("darkorange","purple","cyan4")) +
-  labs(title = "Flipper and bill length",
-       subtitle = "Dimensions for Adelie, Chinstrap and Gentoo Penguins at Palmer Station LTER",
-       x = "Flipper length (mm)",
-       y = "Bill length (mm)",
-       color = "Penguin species",
-       shape = "Penguin species") +
-  theme(legend.position = c(0.85, 0.15),
-        plot.title.position = "plot",
-        plot.caption = element_text(hjust = 0, face= "italic"),
-        plot.caption.position = "plot")
-
-
-#add interactivity with custom tool tip. Cleans up variable names, stops species from repeating twice, and adds in Island information
-ggplotly(flipper_bill, tooltip = c("mylabel"))
-```
-
-# ggiraph examples {orientation="rows"}
-
-Notice the "row" orientation of this dashboard!
-
-## Row
-
-### 
-
-```{r}
-#| title: Highlight Species in Both Scatterplots
-
-#This code comes from https://allisonhorst.github.io/ggiraph-demo/demo.html
-
-#first graph
-p1 <- ggplot(data = penguins, aes(x = flipper_length_mm, 
-                                  y = body_mass_g)) +
-  geom_point_interactive(aes(color = species, 
-                             tooltip = species, 
-                             data_id = species)) +
-  scale_color_manual(values = c("cyan4", "darkorange", "darkorchid4")) +
-  theme_minimal()
-
-#second graph
-p2 <- ggplot(data = penguins, aes(x = bill_depth_mm, 
-                                  y = bill_length_mm)) +
-  geom_point_interactive(aes(color = species, 
-                             tooltip = species, 
-                             data_id = species)) +
-  scale_color_manual(values = c("cyan4", "darkorange", "darkorchid4")) +
-  theme_minimal()
-
-
-#combine graphs with patchwork package (p1 + p2) and make interactive with girafe function
-girafe(ggobj = (p1 + p2), 
-#       width_svg = 8, 
-#       height_svg = 4,
-       options = list(
-         opts_hover(css = "fill: black;"),
-         opts_hover_inv(css = "opacity: 0.1;"),
-         opts_sizing(rescale = FALSE)
-       ))
-```
 
