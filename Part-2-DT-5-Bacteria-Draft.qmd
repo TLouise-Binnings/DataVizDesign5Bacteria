@@ -97,12 +97,12 @@ graph1  <- antibio_long |>
              colour = fct_relevel(Antibiotic,  c("Penicilin", "Streptom", "Neomycin")))) +
   geom_point(aes(x = MIC), position = position_dodge(width = 0.6)) +
   scale_y_discrete(position = "right") +
-  geom_linerange(aes(xmin = 0.001, xmax = MIC), position = position_dodge(width = 0.6), linewidth = 0.6) +
+  geom_linerange(aes(xmin = 0.0001, xmax = MIC), position = position_dodge(width = 0.6), linewidth = 0.6) +
   scale_color_manual(values = c("#238D8D","#A3D350", "#34249C")) +
   scale_x_continuous(transform = c("log10", "reverse"),
-                     limits =  c(0.0009, 1000),
+                     limits =  c(0.0001, 1000),
                      breaks = c(1000, 100, 10, 1.0, 0.1, 0.01, 0.001)) +
-  labs(title = "Bacteria",
+  labs(title = "Gram Negative Bacteria",
        subtitle = "",
        x = "",
        y = "",
