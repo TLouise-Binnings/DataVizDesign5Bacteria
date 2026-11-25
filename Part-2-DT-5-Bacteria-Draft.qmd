@@ -61,6 +61,36 @@ antibio_new <- antibio_wide |>
 antibio_new |> head()
 ```
 
+```{r}
+antibio_long_new <- antibio_long |> 
+  select(Bacteria, Gram_Staining) |>
+  distinct(Bacteria, Gram_Staining) |>
+  mutate(most_effective = 
+           case_when(Bacteria == "Streptococcus viridans" ~ "Penicilin",
+                     Bacteria == "Streptococcus hemolyticus" ~ "Penicilin", 
+                     Bacteria == "Diplococcus pneumoniae" ~ "Penicilin", 
+                     Bacteria == "Streptococcus fecalis" ~ "Neomycin",
+                     Bacteria == "Staphylococcus albus" ~ "Neomycin",
+                     Bacteria == "Staphylococcus aureus" ~ "Neomycin", 
+                     Bacteria == "Brucella antracis" ~ "Penicilin",
+                     Bacteria == "Mycobacterium tuberculosis" ~ "Neomycin",  
+                     Bacteria == "Aerobacter aerogenes" ~ "Streptomycin", 
+                     Bacteria == "Klebsiella pneumoniae" ~ "Neomycin", 
+                     Bacteria == "Pseudomonas aeruginosa" ~ "Neomycin", 
+                     Bacteria == "Escherichia coli" ~ "Neomycin", 
+                     Bacteria == "Salmonella schottmuelleri" ~ "Neomycin", 
+                     #Bacteria == "Proteus vulgaris" ~ "Neomycin & Streptomycin",
+                     Bacteria == "Proteus vulgaris" ~ "Neomycin",
+                     Bacteria == "Brucella abortus" ~ "Neomycin",
+                     Bacteria == "Salmonella (Eberthella) typhosa" ~"Neomycin")) |>
+  add_row(Bacteria = "Proteus vulgaris",
+          Gram_Staining = "negative",
+          most_effective = "Streptomycin")
+
+antibio_long_new |> head()
+```
+
+
 ## Visualizations
 
 Use this Quarto file to explore the data and **develop** your graphs. You will then copy and paste your graph code in to the Dashboard document for your final product. *Note that the dashboard also has a second tab where you need to answer 4 questions!*
@@ -69,7 +99,7 @@ Remember you can have AT MOST 3 visualizations to help you answer the three ques
 
 -   Which bacteria was the hardest to kill? Easiest to kill?
 
--   Was one antibiotic the most effective overall?
+-   Was one antibiotic the most effective overall?b
 
 -   Did antibiotic effectiveness vary by gram staining?
 
@@ -169,5 +199,13 @@ This chart shows a more sophisticated tool tip with custom labels.
 
 ### Chart 3
 
+```{r}
+antibio_long_new |>
+  ggplot(aes(x = most_effective, fill = Gram_Staining)) +
+  geom_dotplot(dotsize = 2.3) + 
+  geom_bar(alpha = 0.2) +
+  guides(fill = "none") +
+  theme_minimal()
+```
 
 
