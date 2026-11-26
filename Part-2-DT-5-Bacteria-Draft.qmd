@@ -62,17 +62,25 @@ antibio_new |> head()
 ```
 
 ```{r}
+
+antibio_long <- antibio_long |>
+  mutate(Antibiotic = case_match(Antibiotic, 
+                    "Penicilin" ~ "Penicillin",
+                    "Streptom" ~ "Streptomycin",
+                    .default = Antibiotic))
+
+
 antibio_long_new <- antibio_long |> 
   select(Bacteria, Gram_Staining) |>
   distinct(Bacteria, Gram_Staining) |>
   mutate(most_effective = 
-           case_when(Bacteria == "Streptococcus viridans" ~ "Penicilin",
-                     Bacteria == "Streptococcus hemolyticus" ~ "Penicilin", 
-                     Bacteria == "Diplococcus pneumoniae" ~ "Penicilin", 
+           case_when(Bacteria == "Streptococcus viridans" ~ "Penicillin",
+                     Bacteria == "Streptococcus hemolyticus" ~ "Penicillin", 
+                     Bacteria == "Diplococcus pneumoniae" ~ "Penicillin", 
                      Bacteria == "Streptococcus fecalis" ~ "Neomycin",
                      Bacteria == "Staphylococcus albus" ~ "Neomycin",
                      Bacteria == "Staphylococcus aureus" ~ "Neomycin", 
-                     Bacteria == "Brucella antracis" ~ "Penicilin",
+                     Bacteria == "Brucella antracis" ~ "Penicillin",
                      Bacteria == "Mycobacterium tuberculosis" ~ "Neomycin",  
                      Bacteria == "Aerobacter aerogenes" ~ "Streptomycin", 
                      Bacteria == "Klebsiella pneumoniae" ~ "Neomycin", 
@@ -120,21 +128,29 @@ Consider adding annotations to your visualizations and dashboards to help clarif
 ```{r}
 #| title: Bacteria graph
 
+picks <- antibio_long_new |>
+  select(Bacteria, Antibiotic = most_effective) |>
+  mutate(label = Antibiotic)
 
-graph1  <- antibio_long |>
+antibio_labelled <-antibio_long |>
+   left_join(picks, by = c("Bacteria", "Antibiotic")) |>
+   mutate(label = coalesce(label, ""))
+ 
+
+graph1  <- antibio_labelled |>
   filter(Gram_Staining == "negative") |>
   ggplot(aes(y = fct_relevel(Bacteria, c("Mycobacterium tuberculosis",  "Aerobacter aerogenes", "Klebsiella pneumoniae", "Pseudomonas aeruginosa", "Escherichia coli", "Salmonella schottmuelleri", "Proteus vulgaris" ,"Brucella abortus","Salmonella (Eberthella) typhosa")),
-             colour = fct_relevel(Antibiotic,  c("Penicilin", "Streptom", "Neomycin")))) +
+             colour = fct_relevel(Antibiotic,  c("Penicillin", "Streptomycin", "Neomycin")))) +
   geom_point(aes(x = MIC), position = position_dodge(width = 0.6)) +
   scale_y_discrete(position = "right") +
   geom_linerange(aes(xmin = 0.0001, xmax = MIC), position = position_dodge(width = 0.6), linewidth = 0.6) +
-  scale_color_manual(values = c("#277D8E","#75D056", "#34249C")) +
+  scale_color_manual(values = c("#2291A7","#4daf4a", "#440154FF")) +
   scale_x_continuous(transform = c("log10", "reverse"),
                      limits =  c(0.0001, 1000),
                      breaks = c(1000, 100, 10, 1.0, 0.1, 0.01, 0.001),
                      labels =  c(1000, 100, 10, 1.0, 0.1, 0.01, 0.001)) +
   theme_minimal() +
-  labs(title = "Gram Negative Bacteria",
+  labs(title = "Gram-negative Bacteria",
        subtitle = "",
        x = "",
        y = "",
@@ -142,10 +158,11 @@ graph1  <- antibio_long |>
        shape = "") +
   theme(axis.text.y.right = element_text(hjust = 1),
         panel.background = element_rect(fill = scales::alpha("#72ADE9", 0.1))) +
-  guides(color = "none")
+  guides(color = "none") +
+  geom_text(aes(x = MIC*2.3, label = label), position = position_dodge(width = 0.6), size = 3.5)
 
 #add interactivity
-ggplotly(graph1) |>
+#ggplotly(graph1) |>
   layout(yaxis = list(side = "right"))
 ```
 
@@ -159,33 +176,37 @@ Could also add some text here...
 #| title: Gram Positive
 
 
-graph2  <- antibio_long |> 
+graph2  <- antibio_labelled |> 
   filter(Gram_Staining == "positive") |>
-  ggplot(aes(y = fct_relevel(Bacteria, c("Streptococcus viridans", "Diplococcus pneumoniae",
-"Streptococcus hemolyticus", 
-"Staphylococcus albus",
-"Staphylococcus aureus", 
-"Brucella antracis",
-"Streptococcus fecalis")),
-             colour = fct_relevel(Antibiotic, c("Neomycin", "Streptom", "Penicilin")))) +
+  ggplot(aes(y = fct_relevel(Bacteria, c(
+                                         "Streptococcus viridans", 
+                                         "Diplococcus pneumoniae",
+                                         "Streptococcus hemolyticus", 
+                                         "Streptococcus fecalis",
+                                         "Staphylococcus albus",
+                                         "Staphylococcus aureus", 
+                                         "Brucella antracis")),
+             colour = fct_relevel(Antibiotic, c("Neomycin", "Streptomycin", "Penicillin")))) +
   geom_point(aes(x = MIC), position = position_dodge(width = 0.6)) +
   geom_linerange(aes(xmin = 0.0001, xmax = MIC), position = position_dodge(width = 0.6), linewidth = 0.6) +
-  scale_color_manual(values = c("#277D8E","#75D056","#34249C")) + 
+  scale_color_manual(values = c("#2291A7","#4daf4a","#440154FF")) + 
   scale_x_continuous(transform = c("log10"),
                      limits = c(0.0001, 1000),
                      breaks = c(0.001, 0.01, 0.1, 1.0, 10, 100, 1000),
-                     labels =  c(1000, 100, 10, 1.0, 0.1, 0.01, 0.001)) +
+                     labels =  c(0.001, 0.01, 0.1, 1.0, 10, 100, 1000)) +
   theme_minimal() +
-  labs(title = "Bacteria",
+  labs(title = "Gram-positive Bacteria",
        subtitle = "",
        x = "",
        y = "",
        color = "",
        shape = "") +
   theme(panel.background = element_rect(fill = scales::alpha("#FDE724", 0.09))) +
-  guides(color = "none")
+  guides(color = "none") +
+  geom_text(aes(x = MIC*2.2, label = label), position = position_dodge(width = 0.6), size = 3.5)
 
-ggplotly(graph2)
+
+#ggplotly(graph2)
 
 ```
 
