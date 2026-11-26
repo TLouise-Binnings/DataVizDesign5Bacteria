@@ -126,7 +126,10 @@ Consider adding annotations to your visualizations and dashboards to help clarif
 
 
 ```{r}
-#| title: Bacteria graph
+#| title: Gram Negative
+#| fig-width: 10
+#| fig-height: 12
+#| out-width: 100%
 
 picks <- antibio_long_new |>
   select(Bacteria, Antibiotic = most_effective) |>
@@ -137,13 +140,13 @@ antibio_labelled <-antibio_long |>
    mutate(label = coalesce(label, ""))
  
 
-graph1  <- antibio_labelled |>
+antibio_labelled |>
   filter(Gram_Staining == "negative") |>
   ggplot(aes(y = fct_relevel(Bacteria, c("Mycobacterium tuberculosis",  "Aerobacter aerogenes", "Klebsiella pneumoniae", "Pseudomonas aeruginosa", "Escherichia coli", "Salmonella schottmuelleri", "Proteus vulgaris" ,"Brucella abortus","Salmonella (Eberthella) typhosa")),
              colour = fct_relevel(Antibiotic,  c("Penicillin", "Streptomycin", "Neomycin")))) +
   geom_point(aes(x = MIC), position = position_dodge(width = 0.6)) +
   scale_y_discrete(position = "right") +
-  geom_linerange(aes(xmin = 0.0001, xmax = MIC), position = position_dodge(width = 0.6), linewidth = 0.6) +
+  geom_linerange(aes(xmin = 0.0001, xmax = MIC), position = position_dodge(width = 0.6), linewidth = 0.8) +
   scale_color_manual(values = c("#2291A7","#4daf4a", "#440154FF")) +
   scale_x_continuous(transform = c("log10", "reverse"),
                      limits =  c(0.0001, 1000),
@@ -155,15 +158,21 @@ graph1  <- antibio_labelled |>
        x = "",
        y = "",
        color = "",
-       shape = "") +
+       shape = "",
+       caption = "**Most difficult Bacteria to Kill showcased by Mycobacterium tuberculosis requiring the highest amount of antibiotic in order for it to be killed") +
   theme(axis.text.y.right = element_text(hjust = 1),
         panel.background = element_rect(fill = scales::alpha("#72ADE9", 0.1))) +
   guides(color = "none") +
-  geom_text(aes(x = MIC*2.3, label = label), position = position_dodge(width = 0.6), size = 3.5)
+  geom_text(aes(x = MIC*2.5, label = label), position = position_dodge(width = 0.6), size = 3.5) +
+  annotate("rect", xmin = 0.0001, xmax = 1000, ymin = 0.6, ymax = 1.4, linetype = "dashed", color = "#DE1A1A", fill = alpha("lightyellow", 0.09), linewidth = 0.8) +
+  annotate("text", x = 10, y = 1.55, color = "#DE1A1A", label = "Mycobacterium tuberculosis = Most Difficult Bacteria to Kill**", fontface = "bold") 
+#+
+ # annotate("text", x = 150, y = 1.55, color = "black", label = "Mycobacterium tuberculosis => ") 
 
 #add interactivity
-#ggplotly(graph1) |>
-  layout(yaxis = list(side = "right"))
+# ggplotly(graph1) |>
+#   layout(yaxis = list(side = "right"))
+
 ```
 
 ## Column {width="50%"}
@@ -174,9 +183,11 @@ Could also add some text here...
 
 ```{r}
 #| title: Gram Positive
+#| fig-width: 10
+#| fig-height: 8
 
 
-graph2  <- antibio_labelled |> 
+antibio_labelled |> 
   filter(Gram_Staining == "positive") |>
   ggplot(aes(y = fct_relevel(Bacteria, c(
                                          "Streptococcus viridans", 
@@ -188,7 +199,7 @@ graph2  <- antibio_labelled |>
                                          "Brucella antracis")),
              colour = fct_relevel(Antibiotic, c("Neomycin", "Streptomycin", "Penicillin")))) +
   geom_point(aes(x = MIC), position = position_dodge(width = 0.6)) +
-  geom_linerange(aes(xmin = 0.0001, xmax = MIC), position = position_dodge(width = 0.6), linewidth = 0.6) +
+  geom_linerange(aes(xmin = 0.0001, xmax = MIC), position = position_dodge(width = 0.6), linewidth = 0.8) +
   scale_color_manual(values = c("#2291A7","#4daf4a","#440154FF")) + 
   scale_x_continuous(transform = c("log10"),
                      limits = c(0.0001, 1000),
@@ -200,10 +211,13 @@ graph2  <- antibio_labelled |>
        x = "",
        y = "",
        color = "",
-       shape = "") +
+       shape = "",
+       caption = "***Easiest Bacteria to Kill showcased by the low amounts of antibiotic required to kill the bacteria") +
   theme(panel.background = element_rect(fill = scales::alpha("#FDE724", 0.09))) +
   guides(color = "none") +
-  geom_text(aes(x = MIC*2.2, label = label), position = position_dodge(width = 0.6), size = 3.5)
+  geom_text(aes(x = MIC*2.2, label = label), position = position_dodge(width = 0.6), size = 3.5) +
+  annotate("rect", xmin = 0.0001, xmax = 0.05, ymin = 6.6, ymax = 7.4, linetype = "dashed", color = "#E76C00", fill = alpha("lightyellow", 0.09), linewidth = 0.8) +
+  annotate("text", x = 2, y = 7, color = "#CC4502", label = "***Easiest Bacteria to Kill = Brucella antracis", fontface = "bold") 
 
 
 #ggplotly(graph2)
@@ -217,7 +231,7 @@ This chart shows a more sophisticated tool tip with custom labels.
 ### Chart 3
 
 ```{r}
-graph3 <- antibio_long_new |>
+antibio_long_new |>
   group_by(most_effective) |>
   arrange(Gram_Staining) |>
   mutate(dot_y = row_number() - 0.5) |>
@@ -234,7 +248,7 @@ graph3 <- antibio_long_new |>
        color = "",
        shape = "") 
 
-ggplotly(graph3)
+#ggplotly(graph3)
 ```
 
 
