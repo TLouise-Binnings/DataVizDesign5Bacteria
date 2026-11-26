@@ -128,24 +128,22 @@ graph1  <- antibio_long |>
   geom_point(aes(x = MIC), position = position_dodge(width = 0.6)) +
   scale_y_discrete(position = "right") +
   geom_linerange(aes(xmin = 0.0001, xmax = MIC), position = position_dodge(width = 0.6), linewidth = 0.6) +
-  scale_color_manual(values = c("#238D8D","#A3D350", "#34249C")) +
+  scale_color_manual(values = c("#277D8E","#75D056", "#34249C")) +
   scale_x_continuous(transform = c("log10", "reverse"),
                      limits =  c(0.0001, 1000),
-                     breaks = c(1000, 100, 10, 1.0, 0.1, 0.01, 0.001)) +
+                     breaks = c(1000, 100, 10, 1.0, 0.1, 0.01, 0.001),
+                     labels =  c(1000, 100, 10, 1.0, 0.1, 0.01, 0.001)) +
+  theme_minimal() +
   labs(title = "Gram Negative Bacteria",
        subtitle = "",
        x = "",
        y = "",
        color = "",
        shape = "") +
-  theme(legend.position = c(0.2, 0.7),
-        plot.title.position = "plot",
-        plot.caption = element_text(hjust = 0, face= "italic"),
-        plot.caption.position = "plot",
-        axis.text.y.right = element_text(hjust = 1)) +
-  theme_minimal()
+  theme(axis.text.y.right = element_text(hjust = 1),
+        panel.background = element_rect(fill = scales::alpha("#72ADE9", 0.1))) +
+  guides(color = "none")
 
-graph1
 #add interactivity
 ggplotly(graph1) |>
   layout(yaxis = list(side = "right"))
@@ -165,29 +163,27 @@ graph2  <- antibio_long |>
   filter(Gram_Staining == "positive") |>
   ggplot(aes(y = fct_relevel(Bacteria, c("Streptococcus viridans", "Diplococcus pneumoniae",
 "Streptococcus hemolyticus", 
-"Streptococcus fecalis",
 "Staphylococcus albus",
 "Staphylococcus aureus", 
-"Brucella antracis")),
+"Brucella antracis",
+"Streptococcus fecalis")),
              colour = fct_relevel(Antibiotic, c("Neomycin", "Streptom", "Penicilin")))) +
   geom_point(aes(x = MIC), position = position_dodge(width = 0.6)) +
   geom_linerange(aes(xmin = 0.0001, xmax = MIC), position = position_dodge(width = 0.6), linewidth = 0.6) +
-  scale_color_manual(values = c("#34249C","#A3D350","#238D8D")) +
+  scale_color_manual(values = c("#277D8E","#75D056","#34249C")) + 
   scale_x_continuous(transform = c("log10"),
                      limits = c(0.0001, 1000),
-                     breaks = c(0.001, 0.01, 0.1, 1.0, 10, 100, 1000)) +
+                     breaks = c(0.001, 0.01, 0.1, 1.0, 10, 100, 1000),
+                     labels =  c(1000, 100, 10, 1.0, 0.1, 0.01, 0.001)) +
+  theme_minimal() +
   labs(title = "Bacteria",
        subtitle = "",
        x = "",
        y = "",
        color = "",
        shape = "") +
-  theme(legend.position = c(0.2, 0.7),
-        plot.title.position = "plot",
-        plot.caption = element_text(hjust = 0, face= "italic"),
-        plot.caption.position = "plot") +
-  guides(color = "none") +
-  theme_minimal()
+  theme(panel.background = element_rect(fill = scales::alpha("#FDE724", 0.09))) +
+  guides(color = "none")
 
 ggplotly(graph2)
 
@@ -200,12 +196,24 @@ This chart shows a more sophisticated tool tip with custom labels.
 ### Chart 3
 
 ```{r}
-antibio_long_new |>
+graph3 <- antibio_long_new |>
+  group_by(most_effective) |>
+  arrange(Gram_Staining) |>
+  mutate(dot_y = row_number() - 0.5) |>
   ggplot(aes(x = most_effective, fill = Gram_Staining)) +
-  geom_dotplot(dotsize = 2.3) + 
-  geom_bar(alpha = 0.2) +
-  guides(fill = "none") +
-  theme_minimal()
+  geom_point(aes(y = dot_y), shape = 21, size = 5) + 
+  geom_bar(alpha = 0.2, position = position_stack(reverse = TRUE)) +
+  #guides(fill = "none") +
+  scale_fill_manual(values = c("#72ADE9", "#FDE724")) +
+  theme_minimal() +
+  labs(title = "Which Antibiotic is most effective?",
+       subtitle = "Count for each time each antibiotic was the most effective against the bacteria",
+       x = "",
+       y = "",
+       color = "",
+       shape = "") 
+
+ggplotly(graph3)
 ```
 
 
