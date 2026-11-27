@@ -186,7 +186,7 @@ antibio_labelled |>
   guides(color = "none") +
   geom_text(aes(x = MIC*3.2, label = label), position = position_dodge(width = 0.6), size = 3.5) +
   annotate("rect", xmin = 0.0001, xmax = 1050, ymin = 0.6, ymax = 1.4, linetype = "longdash", color = "#EB0C0C", fill = alpha("lightyellow", 0.09), linewidth = 0.8) +
-  annotate("text", x = 6, y = 1.55, color = "#EB0C0C", label = "Mycobacterium tuberculosis = Most Difficult Bacteria to Kill**", fontface = "bold") +
+  annotate("text", x = 4, y = 1.55, color = "#EB0C0C", label = "Mycobacterium tuberculosis = Most Difficult Bacteria to Kill**", fontface = "bold") +
   annotate("point", x = 2, y = 1.2, size = 6, color = alpha("#440154FF", 0.4)) +
   annotate("point", x = 1, y = 2, size = 6, color = alpha("#4daf4a", 0.4)) +
   annotate("point", x = 1, y = 3.2, size = 6, color = alpha("#440154FF", 0.4)) +
@@ -258,8 +258,8 @@ antibio_labelled |>
         plot.title = element_text(size = 18)) +
   guides(color = "none") +
   geom_text(aes(x = MIC*2.5, label = label), position = position_dodge(width = 0.6), size = 3.5) +
-  annotate("rect", xmin = 0.0001, xmax = 0.02, ymin = 6.6, ymax = 7.4, linetype = "longdash", color = alpha("#004AF7", 0.3), fill = NA, linewidth = 1.2) +
-  annotate("rect", xmin = 0.0001, xmax = 0.02, ymin = 6.6, ymax = 7.4, linetype = "longdash", color = "#004AF7", fill = alpha("lightyellow", 0.09), linewidth = 0.8) +
+  annotate("rect", xmin = 0.0001, xmax = 0.018, ymin = 6.6, ymax = 7.4, linetype = "longdash", color = alpha("#004AF7", 0.3), fill = NA, linewidth = 1.2) +
+  annotate("rect", xmin = 0.0001, xmax = 0.018, ymin = 6.6, ymax = 7.4, linetype = "longdash", color = "#004AF7", fill = alpha("lightyellow", 0.09), linewidth = 0.8) +
   annotate("text", x = 0.9, y = 7, color = "#004AF7", label = "Easiest Bacteria to Kill* = Brucella antracis", fontface = "bold") +
   annotate("point", x = 0.001, y = 7.2, color = alpha("#440154FF", 0.4), size = 6) +
     annotate("point", x = 0.001, y = 5.8, color = alpha("#2291A7", 0.4), size = 6) +
