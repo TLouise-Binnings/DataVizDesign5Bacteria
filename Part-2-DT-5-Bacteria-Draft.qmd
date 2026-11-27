@@ -124,7 +124,6 @@ Consider adding annotations to your visualizations and dashboards to help clarif
 
 
 
-
 ```{r}
 #| title: Gram Negative
 #| fig-width: 10
@@ -171,19 +170,23 @@ antibio_labelled |>
                      breaks = c(1000, 100, 10, 1.0, 0.1, 0.01, 0.001),
                      labels =  c(1000, 100, 10, 1.0, 0.1, 0.01, 0.001)) +
   theme_minimal() +
-  labs(title = "Gram-negative Bacteria",
+  labs(title = "Gram Negative Bacteria",
        subtitle = "",
        x = "",
        y = "",
        color = "",
        shape = "",
-       caption = "**Most difficult Bacteria to Kill showcased by Mycobacterium tuberculosis requiring the highest amount of antibiotic in order for it to be killed") +
-  theme(axis.text.y.right = element_text(hjust = 1),
-        panel.background = element_rect(fill = scales::alpha("#72ADE9", 0.1))) +
+       caption = "**Most Difficult Bacteria to Kill determined by the high amounts of antibiotic required to kill Mycobacterium tuberculosis by the 3 antibiotics") +
+  theme(axis.text.y.right = element_text(hjust = 0,
+                                         size = 13,
+                                         color = "grey10"),
+        panel.background = element_rect(fill = scales::alpha("#72ADE9", 0.1)),
+        plot.caption = element_text(size = 11, face = "italic", hjust = 0),
+        plot.title = element_text(size = 18)) +
   guides(color = "none") +
   geom_text(aes(x = MIC*3.2, label = label), position = position_dodge(width = 0.6), size = 3.5) +
   annotate("rect", xmin = 0.0001, xmax = 1050, ymin = 0.6, ymax = 1.4, linetype = "longdash", color = "#EB0C0C", fill = alpha("lightyellow", 0.09), linewidth = 0.8) +
-  annotate("text", x = 8, y = 1.55, color = "#EB0C0C", label = "Mycobacterium tuberculosis = Most Difficult Bacteria to Kill**", fontface = "bold") +
+  annotate("text", x = 6, y = 1.55, color = "#EB0C0C", label = "Mycobacterium tuberculosis = Most Difficult Bacteria to Kill**", fontface = "bold") +
   annotate("point", x = 2, y = 1.2, size = 6, color = alpha("#440154FF", 0.4)) +
   annotate("point", x = 1, y = 2, size = 6, color = alpha("#4daf4a", 0.4)) +
   annotate("point", x = 1, y = 3.2, size = 6, color = alpha("#440154FF", 0.4)) +
@@ -240,14 +243,19 @@ antibio_labelled |>
                      breaks = c(0.001, 0.01, 0.1, 1.0, 10, 100, 1000),
                      labels =  c(0.001, 0.01, 0.1, 1.0, 10, 100, 1000)) +
   theme_minimal() +
-  labs(title = "Gram-positive Bacteria",
+  labs(title = "Gram Positive Bacteria",
        subtitle = "",
        x = "",
        y = "",
        color = "",
        shape = "",
-       caption = "*Easiest Bacteria to Kill determined by the low amounts of antibiotic required to kill the bacteria by all 3 antibiotics") +
-  theme(panel.background = element_rect(fill = scales::alpha("#FDE724", 0.09))) +
+       caption = "*Easiest Bacteria to Kill determined by the low amounts of antibiotic required to kill Brucella antracis by all 3 antibiotics") +
+  theme(panel.background = element_rect(fill = scales::alpha("#FDE724", 0.09)),
+        axis.text.y = element_text(size = 13,
+                                   vjust = 1,
+                                   color = "grey10"),
+        plot.caption = element_text(size = 11, face = "italic"),
+        plot.title = element_text(size = 18)) +
   guides(color = "none") +
   geom_text(aes(x = MIC*2.5, label = label), position = position_dodge(width = 0.6), size = 3.5) +
   annotate("rect", xmin = 0.0001, xmax = 0.02, ymin = 6.6, ymax = 7.4, linetype = "longdash", color = alpha("#004AF7", 0.3), fill = NA, linewidth = 1.2) +
