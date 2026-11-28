@@ -1,0 +1,304 @@
+---
+title: "Burtin's Bacteria"
+author: "Theresa Louise Binnings"
+format:
+  html:
+    embed-resources: true
+execute: 
+  warning: false
+  echo: true
+  error: false
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+library(tidyverse)
+library(plotly)
+library(ggiraph)
+library(patchwork)
+```
+
+## Burtin's Bacteria
+
+Doctors need to be able to make quick decisions about which antibiotics to prescribe when a patient has a bacterial infection. Different bacteria respond differently to various antibiotics. Additionally, it can take too much time to identify a particular bacterial strain; Gram Staining is an assessment that can be done within the clinic to help "type" the bacteria and more quickly assess which antibiotic to use.
+
+Minimum Inhibitory Concentration (MIC) is commonly used as a measure of how effective an antibiotic is at killing a bacteria. The numeric measure can be thought of as measuring how much antibiotic is needed in a petri dish in order to kill the bacteria; **a smaller number is better because it means the antibiotic was more effective at killing the bacteria with a smaller dose.**
+
+After World War II, antibiotics earned the moniker “wonder drugs” for quickly treating previously-incurable diseases. Data was gathered to determine which drug worked best for each bacterial infection. Comparing drug performance was an enormous aid for practitioners and scientists alike.
+
+In the fall of 1951, German graphic designer William Burtin gathered data on the MIC of three antibiotics for 16 different bacteria. Each bacteria was classified according to Gram Staining: Positive/Negative.
+
+In this project, you will create visualizations to answer three questions. One of the goals of the design task is to answer all three questions with no more than three visualizations, preferably fewer (i.e., try to answer all three questions in fewer than 3 visualizations). All visualizations will be organized on a single static dashboard using the **`dashboard`** Quarto format. Find more information [**HERE**](https://quarto.org/docs/dashboards/). I have provided an example in this project folder (*warning* - it contains bad visualizations for demonstration purposes).
+
+**Here are the questions to be answered:**
+
+-   Which bacteria was the hardest to kill? Easiest to kill?
+
+-   Was one antibiotic the most effective overall?
+
+-   Did the effectiveness of each antibiotic vary by gram staining?
+
+```{r}
+antibio_wide <- read_csv("Burtin_Antibiotics.csv")
+antibio_wide |> head()
+```
+
+Here is another reformulation of the same data that may or may not be useful, depending on the visualization you design.
+
+```{r}
+antibio_long <- read_csv("Burtin_Antibiotics_Alt.csv")
+antibio_long |> head()
+```
+
+Remember, you can also create new variables if that is helpful, for example:
+
+```{r}
+antibio_new <- antibio_wide |> 
+  mutate(MIC_total = Penicilin + Streptom + Neomycin) 
+
+antibio_new |> head()
+```
+
+```{r}
+
+antibio_long <- antibio_long |>
+  mutate(Antibiotic = case_match(Antibiotic, 
+                    "Penicilin" ~ "Penicillin",
+                    "Streptom" ~ "Streptomycin",
+                    .default = Antibiotic))
+
+
+antibio_long_new <- antibio_long |> 
+  select(Bacteria, Gram_Staining) |>
+  distinct(Bacteria, Gram_Staining) |>
+  mutate(most_effective = 
+           case_when(Bacteria == "Streptococcus viridans" ~ "Penicillin",
+                     Bacteria == "Streptococcus hemolyticus" ~ "Penicillin", 
+                     Bacteria == "Diplococcus pneumoniae" ~ "Penicillin", 
+                     Bacteria == "Streptococcus fecalis" ~ "Neomycin",
+                     Bacteria == "Staphylococcus albus" ~ "Neomycin",
+                     Bacteria == "Staphylococcus aureus" ~ "Neomycin", 
+                     Bacteria == "Brucella antracis" ~ "Penicillin",
+                     Bacteria == "Mycobacterium tuberculosis" ~ "Neomycin",  
+                     Bacteria == "Aerobacter aerogenes" ~ "Streptomycin", 
+                     Bacteria == "Klebsiella pneumoniae" ~ "Neomycin", 
+                     Bacteria == "Pseudomonas aeruginosa" ~ "Neomycin", 
+                     Bacteria == "Escherichia coli" ~ "Neomycin", 
+                     Bacteria == "Salmonella schottmuelleri" ~ "Neomycin", 
+                     #Bacteria == "Proteus vulgaris" ~ "Neomycin & Streptomycin",
+                     Bacteria == "Proteus vulgaris" ~ "Neomycin",
+                     Bacteria == "Brucella abortus" ~ "Neomycin",
+                     Bacteria == "Salmonella (Eberthella) typhosa" ~"Neomycin")) |>
+  add_row(Bacteria = "Proteus vulgaris",
+          Gram_Staining = "negative",
+          most_effective = "Streptomycin")
+
+antibio_long_new |> head()
+```
+
+
+## Visualizations
+
+Use this Quarto file to explore the data and **develop** your graphs. You will then copy and paste your graph code in to the Dashboard document for your final product. *Note that the dashboard also has a second tab where you need to answer 4 questions!*
+
+Remember you can have AT MOST 3 visualizations to help you answer the three questions:
+
+-   Which bacteria was the hardest to kill? Easiest to kill?
+
+-   Was one antibiotic the most effective overall?b
+
+-   Did antibiotic effectiveness vary by gram staining?
+
+Consider adding annotations to your visualizations and dashboards to help clarify the message of your visualizations.
+
+```{r}
+#esquisse::esquisser(data) remember you can use this to get started but you will need to make some more adjustments
+#BE CAREFUL - the default geometry esquisse chooses are not always correct or best!
+```
+
+
+
+### Scatterplot
+
+
+
+```{r}
+#| title: Gram Negative
+#| fig-width: 10
+#| fig-height: 12
+#| out-width: 100%
+
+picks <- antibio_long_new |>
+  select(Bacteria, Antibiotic = most_effective) |>
+  mutate(label = Antibiotic)
+
+antibio_labelled <-antibio_long |>
+   left_join(picks, by = c("Bacteria", "Antibiotic")) |>
+   mutate(label = coalesce(label, ""))
+ 
+
+antibio_labelled |>
+  filter(Gram_Staining == "negative") |>
+  ggplot(aes(y = fct_relevel(Bacteria, c("Mycobacterium tuberculosis",  
+                                         "Aerobacter aerogenes", 
+                                         "Klebsiella pneumoniae", 
+                                         "Pseudomonas aeruginosa", 
+                                         "Escherichia coli", 
+                                         "Salmonella schottmuelleri", 
+                                         "Proteus vulgaris",
+                                         "Brucella abortus",
+                                         "Salmonella (Eberthella) typhosa")),
+             colour = fct_relevel(Antibiotic,  c("Penicillin", "Streptomycin", "Neomycin")))) +
+  geom_point(aes(x = MIC), position = position_dodge(width = 0.6), size = 3) +
+  scale_y_discrete(position = "right") +
+  geom_segment(aes(x = 0.0001, y = 1.2, xend = 2, yend = 1.2), linewidth = 3, color = alpha("#440154FF", 0.02)) +
+  geom_segment(aes(x = 0.0001, y = 2, xend = 1, yend = 2), linewidth = 3, color = alpha("#4daf4a", 0.02)) +
+  geom_segment(aes(x = 0.0001, y = 3.2, xend = 1, yend = 3.2), linewidth = 3, color = alpha("#440154FF", 0.02)) +
+  geom_segment(aes(x = 0.0001, y = 4.2, xend = 0.4, yend = 4.2), linewidth = 3, color = alpha("#440154FF", 0.02)) +
+  geom_segment(aes(x = 0.0001, y = 5.2, xend = 0.1, yend = 5.2), linewidth = 3, color = alpha("#440154FF", 0.02)) +
+  geom_segment(aes(x = 0.0001, y = 6.2, xend = 0.09, yend = 6.2), linewidth = 3, color = alpha("#440154FF", 0.02)) +
+  geom_segment(aes(x = 0.0001, y = 7.2, xend = 0.1, yend = 7.2), linewidth = 3, color = alpha("#440154FF", 0.02)) +
+  geom_segment(aes(x = 0.0001, y = 8.2, xend = 0.02, yend = 8.2), linewidth = 3, color = alpha("#440154FF", 0.02)) +
+  geom_segment(aes(x = 0.0001, y = 9.2, xend = 0.008, yend = 9.2), linewidth = 3, color = alpha("#440154FF", 0.02)) +
+  geom_segment(aes(x = 0.0001, y = 7, xend = 0.1, yend = 7), linewidth = 3, color = alpha("#4daf4a", 0.02)) +
+  geom_linerange(aes(xmin = 0.0001, xmax = MIC), position = position_dodge(width = 0.6), linewidth = 0.8) +
+  scale_color_manual(values = c("#2291A7","#4daf4a", "#440154FF")) +
+  scale_x_continuous(transform = c("log10", "reverse"),
+                     limits =  c(0.0001, 1100),
+                     breaks = c(1000, 100, 10, 1.0, 0.1, 0.01, 0.001),
+                     labels =  c(1000, 100, 10, 1.0, 0.1, 0.01, 0.001)) +
+  theme_minimal() +
+  labs(title = "Gram Negative Bacteria",
+       subtitle = "",
+       x = "",
+       y = "",
+       color = "",
+       shape = "",
+       caption = "**Most Difficult Bacteria to Kill determined by the high amounts of antibiotic required to kill Mycobacterium tuberculosis by the 3 antibiotics") +
+  theme(axis.text.y.right = element_text(hjust = 0,
+                                         size = 13,
+                                         color = "grey10"),
+        panel.background = element_rect(fill = scales::alpha("#72ADE9", 0.1)),
+        plot.caption = element_text(size = 11, face = "italic", hjust = 0),
+        plot.title = element_text(size = 18)) +
+  guides(color = "none") +
+  geom_text(aes(x = MIC*3.2, label = label), position = position_dodge(width = 0.6), size = 3.5) +
+  annotate("rect", xmin = 0.0001, xmax = 1050, ymin = 0.6, ymax = 1.4, linetype = "longdash", color = "#EB0C0C", fill = alpha("lightyellow", 0.09), linewidth = 0.8) +
+  annotate("text", x = 4, y = 1.55, color = "#EB0C0C", label = "Mycobacterium tuberculosis = Most Difficult Bacteria to Kill**", fontface = "bold") +
+  annotate("point", x = 2, y = 1.2, size = 6, color = alpha("#440154FF", 0.4)) +
+  annotate("point", x = 1, y = 2, size = 6, color = alpha("#4daf4a", 0.4)) +
+  annotate("point", x = 1, y = 3.2, size = 6, color = alpha("#440154FF", 0.4)) +
+  annotate("point", x = 0.4, y = 4.2, size = 6, color = alpha("#440154FF", 0.4)) +
+  annotate("point", x = 0.1, y = 5.2, size = 6, color = alpha("#440154FF", 0.4)) +
+  annotate("point", x = 0.09, y = 6.2, size = 6, color = alpha("#440154FF", 0.4)) +
+  annotate("point", x = 0.1, y = 7.2, size = 6, color = alpha("#440154FF", 0.4)) +
+  annotate("point", x = 0.02, y = 8.2, size = 6, color = alpha("#440154FF", 0.4)) +
+  annotate("point", x = 0.008, y = 9.2, size = 6, color = alpha("#440154FF", 0.4)) +
+  annotate("point", x = 0.1, y = 7, size = 6, color = alpha("#4daf4a", 0.4))
+
+
+#add interactivity
+# ggplotly(graph1) |>
+#   layout(yaxis = list(side = "right"))
+
+```
+
+## Column {width="50%"}
+
+### Chart 2
+
+Could also add some text here...
+
+```{r}
+#| title: Gram Positive
+#| fig-width: 10
+#| fig-height: 8
+
+
+antibio_labelled |> 
+  filter(Gram_Staining == "positive") |>
+  ggplot(aes(y = fct_relevel(Bacteria, c(
+                                         "Streptococcus viridans", 
+                                         "Diplococcus pneumoniae",
+                                         "Streptococcus hemolyticus", 
+                                         "Streptococcus fecalis",
+                                         "Staphylococcus albus",
+                                         "Staphylococcus aureus", 
+                                         "Brucella antracis")),
+             colour = fct_relevel(Antibiotic, c("Neomycin", "Streptomycin", "Penicillin")))) +
+  geom_point(aes(x = MIC), position = position_dodge(width = 0.6), size = 3) +
+  geom_segment(aes(x = 0.0001, y = 7.2, xend = 0.001, yend = 7.2), linewidth = 3, color = alpha("#440154FF", 0.02)) +
+  geom_segment(aes(x = 0.0001, y = 5.8, xend = 0.001, yend = 5.8), linewidth = 3, color = alpha("#2291A7", 0.02)) +
+  geom_segment(aes(x = 0.0001, y = 4.8, xend = 0.001, yend = 4.8), linewidth = 3, color = alpha("#2291A7", 0.02)) +
+  geom_segment(aes(x = 0.0001, y = 3.2, xend = 0.001, yend = 3.2), linewidth = 3, color = alpha("#440154FF", 0.02)) +
+  geom_segment(aes(x = 0.0001, y = 3.8, xend = 0.1, yend = 3.8), linewidth = 3, color = alpha("#2291A7", 0.02)) +
+  geom_segment(aes(x = 0.0001, y = 2.2, xend = 0.005, yend = 2.2), linewidth = 3, color = alpha("#440154FF", 0.02)) +
+  geom_segment(aes(x = 0.0001, y = 1.2, xend = 0.005, yend = 1.2), linewidth = 3, color = alpha("#440154FF", 0.02)) +
+  geom_linerange(aes(xmin = 0.0001, xmax = MIC), position = position_dodge(width = 0.6), linewidth = 0.7) +
+  scale_color_manual(values = c("#2291A7","#4daf4a","#440154FF")) + 
+  scale_x_continuous(transform = c("log10"),
+                     limits = c(0.0001, 1000),
+                     breaks = c(0.001, 0.01, 0.1, 1.0, 10, 100, 1000),
+                     labels =  c(0.001, 0.01, 0.1, 1.0, 10, 100, 1000)) +
+  theme_minimal() +
+  labs(title = "Gram Positive Bacteria",
+       subtitle = "",
+       x = "",
+       y = "",
+       color = "",
+       shape = "",
+       caption = "*Easiest Bacteria to Kill determined by the low amounts of antibiotic required to kill Brucella antracis by all 3 antibiotics") +
+  theme(panel.background = element_rect(fill = scales::alpha("#FDE724", 0.09)),
+        axis.text.y = element_text(size = 13,
+                                   vjust = 1,
+                                   color = "grey10"),
+        plot.caption = element_text(size = 11, face = "italic"),
+        plot.title = element_text(size = 18)) +
+  guides(color = "none") +
+  geom_text(aes(x = MIC*2.5, label = label), position = position_dodge(width = 0.6), size = 3.5) +
+  annotate("rect", xmin = 0.0001, xmax = 0.018, ymin = 6.6, ymax = 7.4, linetype = "longdash", color = alpha("#004AF7", 0.3), fill = NA, linewidth = 1.2) +
+  annotate("rect", xmin = 0.0001, xmax = 0.018, ymin = 6.6, ymax = 7.4, linetype = "longdash", color = "#004AF7", fill = alpha("lightyellow", 0.09), linewidth = 0.8) +
+  annotate("text", x = 0.9, y = 7, color = "#004AF7", label = "Easiest Bacteria to Kill* = Brucella antracis", fontface = "bold") +
+  annotate("point", x = 0.001, y = 7.2, color = alpha("#440154FF", 0.4), size = 6) +
+    annotate("point", x = 0.001, y = 5.8, color = alpha("#2291A7", 0.4), size = 6) +
+    annotate("point", x = 0.001, y = 4.8, color = alpha("#2291A7", 0.4), size = 6) +
+    annotate("point", x = 0.001, y = 3.2, color = alpha("#440154FF", 0.4), size = 6) +
+    annotate("point", x = 0.1, y = 3.8, color = alpha("#2291A7", 0.4), size = 6) +
+    annotate("point", x = 0.005, y = 2.2, color = alpha("#440154FF", 0.4), size = 6) +
+    annotate("point", x = 0.005, y = 1.2, color = alpha("#440154FF", 0.4), size = 6) 
+
+
+#ggplotly(graph2)
+
+```
+
+### Text beyween charts
+
+This chart shows a more sophisticated tool tip with custom labels.
+
+### Chart 3
+
+```{r}
+antibio_long_new |>
+  group_by(most_effective) |>
+  arrange(Gram_Staining) |>
+  mutate(dot_y = row_number() - 0.5) |>
+  ggplot(aes(x = most_effective, fill = Gram_Staining)) +
+  geom_point(aes(y = dot_y), shape = 21, size = 5) + 
+  geom_bar(alpha = 0.2, position = position_stack(reverse = TRUE)) +
+  #guides(fill = "none") +
+  scale_fill_manual(values = c("#72ADE9", "#FDE724")) +
+  theme_minimal() +
+  labs(title = "Which Antibiotic is most effective?",
+       subtitle = "Count for each time each antibiotic was the most effective against the bacteria",
+       x = "",
+       y = "",
+       color = "",
+       shape = "") 
+
+#ggplotly(graph3)
+```
+
+

@@ -18,6 +18,8 @@ library(tidyverse)
 library(plotly)
 library(ggiraph)
 library(patchwork)
+#install.packages("ggnewscale")
+library(ggnewscale)
 ```
 
 ## Burtin's Bacteria
@@ -166,7 +168,7 @@ antibio_labelled |>
   geom_linerange(aes(xmin = 0.0001, xmax = MIC), position = position_dodge(width = 0.6), linewidth = 0.8) +
   scale_color_manual(values = c("#2291A7","#4daf4a", "#440154FF")) +
   scale_x_continuous(transform = c("log10", "reverse"),
-                     limits =  c(0.0001, 1100),
+                     limits =  c(0.0001, 1151),
                      breaks = c(1000, 100, 10, 1.0, 0.1, 0.01, 0.001),
                      labels =  c(1000, 100, 10, 1.0, 0.1, 0.01, 0.001)) +
   theme_minimal() +
@@ -184,8 +186,13 @@ antibio_labelled |>
         plot.caption = element_text(size = 11, face = "italic", hjust = 0),
         plot.title = element_text(size = 18)) +
   guides(color = "none") +
-  geom_text(aes(x = MIC*3.2, label = label), position = position_dodge(width = 0.6), size = 3.5) +
-  annotate("rect", xmin = 0.0001, xmax = 1050, ymin = 0.6, ymax = 1.4, linetype = "longdash", color = "#EB0C0C", fill = alpha("lightyellow", 0.09), linewidth = 0.8) +
+  # new_scale_color() +
+  geom_text(aes(x = MIC*3.75, label = label), position = position_dodge(width = 0.6), size = 3.5) +
+  # scale_color_manual(values = c("Neomycin" = "#187E93",
+  #                                 "Streptomycin" = "#4A7F0F",
+  #                                 "Penicillin" = "#440154FF"),
+  #                               guide = "none") +
+  annotate("rect", xmin = 0.0001, xmax = 1150, ymin = 0.6, ymax = 1.4, linetype = "longdash", color = "#EB0C0C", fill = alpha("lightyellow", 0.09), linewidth = 0.8) +
   annotate("text", x = 4, y = 1.55, color = "#EB0C0C", label = "Mycobacterium tuberculosis = Most Difficult Bacteria to Kill**", fontface = "bold") +
   annotate("point", x = 2, y = 1.2, size = 6, color = alpha("#440154FF", 0.4)) +
   annotate("point", x = 1, y = 2, size = 6, color = alpha("#4daf4a", 0.4)) +
@@ -227,15 +234,15 @@ antibio_labelled |>
                                          "Staphylococcus albus",
                                          "Staphylococcus aureus", 
                                          "Brucella antracis")),
-             colour = fct_relevel(Antibiotic, c("Neomycin", "Streptomycin", "Penicillin")))) +
+             colour = fct_relevel(Antibiotic, c("Penicillin", "Streptomycin", "Neomycin")))) +
   geom_point(aes(x = MIC), position = position_dodge(width = 0.6), size = 3) +
-  geom_segment(aes(x = 0.0001, y = 7.2, xend = 0.001, yend = 7.2), linewidth = 3, color = alpha("#440154FF", 0.02)) +
-  geom_segment(aes(x = 0.0001, y = 5.8, xend = 0.001, yend = 5.8), linewidth = 3, color = alpha("#2291A7", 0.02)) +
-  geom_segment(aes(x = 0.0001, y = 4.8, xend = 0.001, yend = 4.8), linewidth = 3, color = alpha("#2291A7", 0.02)) +
-  geom_segment(aes(x = 0.0001, y = 3.2, xend = 0.001, yend = 3.2), linewidth = 3, color = alpha("#440154FF", 0.02)) +
-  geom_segment(aes(x = 0.0001, y = 3.8, xend = 0.1, yend = 3.8), linewidth = 3, color = alpha("#2291A7", 0.02)) +
-  geom_segment(aes(x = 0.0001, y = 2.2, xend = 0.005, yend = 2.2), linewidth = 3, color = alpha("#440154FF", 0.02)) +
-  geom_segment(aes(x = 0.0001, y = 1.2, xend = 0.005, yend = 1.2), linewidth = 3, color = alpha("#440154FF", 0.02)) +
+  geom_segment(aes(x = 0.0001, y = 6.8, xend = 0.001, yend = 6.8), linewidth = 3, color = alpha("#2291A7", 0.02)) +
+  geom_segment(aes(x = 0.0001, y = 6.2, xend = 0.001, yend = 6.2), linewidth = 3, color = alpha("#440154FF", 0.02)) +
+  geom_segment(aes(x = 0.0001, y = 5.2, xend = 0.001, yend = 5.2), linewidth = 3, color = alpha("#440154FF", 0.02)) +
+  geom_segment(aes(x = 0.0001, y = 2.8, xend = 0.001, yend = 2.8), linewidth = 3, color = alpha("#2291A7", 0.02)) +
+  geom_segment(aes(x = 0.0001, y = 4.2, xend = 0.1, yend = 4.2), linewidth = 3, color = alpha("#440154FF", 0.02)) +
+  geom_segment(aes(x = 0.0001, y = 1.8, xend = 0.005, yend = 1.8), linewidth = 3, color = alpha("#2291A7", 0.02)) +
+  geom_segment(aes(x = 0.0001, y = 0.8, xend = 0.005, yend = 0.8), linewidth = 3, color = alpha("#2291A7", 0.02)) +
   geom_linerange(aes(xmin = 0.0001, xmax = MIC), position = position_dodge(width = 0.6), linewidth = 0.7) +
   scale_color_manual(values = c("#2291A7","#4daf4a","#440154FF")) + 
   scale_x_continuous(transform = c("log10"),
@@ -257,17 +264,17 @@ antibio_labelled |>
         plot.caption = element_text(size = 11, face = "italic"),
         plot.title = element_text(size = 18)) +
   guides(color = "none") +
-  geom_text(aes(x = MIC*2.5, label = label), position = position_dodge(width = 0.6), size = 3.5) +
+  geom_text(aes(x = MIC*3, label = label), position = position_dodge(width = 0.6), size = 3.5) +
   annotate("rect", xmin = 0.0001, xmax = 0.018, ymin = 6.6, ymax = 7.4, linetype = "longdash", color = alpha("#004AF7", 0.3), fill = NA, linewidth = 1.2) +
   annotate("rect", xmin = 0.0001, xmax = 0.018, ymin = 6.6, ymax = 7.4, linetype = "longdash", color = "#004AF7", fill = alpha("lightyellow", 0.09), linewidth = 0.8) +
   annotate("text", x = 0.9, y = 7, color = "#004AF7", label = "Easiest Bacteria to Kill* = Brucella antracis", fontface = "bold") +
-  annotate("point", x = 0.001, y = 7.2, color = alpha("#440154FF", 0.4), size = 6) +
-    annotate("point", x = 0.001, y = 5.8, color = alpha("#2291A7", 0.4), size = 6) +
-    annotate("point", x = 0.001, y = 4.8, color = alpha("#2291A7", 0.4), size = 6) +
-    annotate("point", x = 0.001, y = 3.2, color = alpha("#440154FF", 0.4), size = 6) +
-    annotate("point", x = 0.1, y = 3.8, color = alpha("#2291A7", 0.4), size = 6) +
-    annotate("point", x = 0.005, y = 2.2, color = alpha("#440154FF", 0.4), size = 6) +
-    annotate("point", x = 0.005, y = 1.2, color = alpha("#440154FF", 0.4), size = 6) 
+  annotate("point", x = 0.001, y = 6.8, color = alpha("#2291A7", 0.4), size = 6) +
+    annotate("point", x = 0.001, y = 6.2, color = alpha("#440154FF", 0.4), size = 6) +
+    annotate("point", x = 0.001, y = 5.2, color = alpha("#440154FF", 0.4), size = 6) +
+    annotate("point", x = 0.001, y = 2.8, color = alpha("#2291A7", 0.4), size = 6) +
+    annotate("point", x = 0.1, y = 4.2, color = alpha("#440154FF", 0.4), size = 6) +
+    annotate("point", x = 0.005, y = 1.8, color = alpha("#2291A7", 0.4), size = 6) +
+    annotate("point", x = 0.005, y = 0.8, color = alpha("#2291A7", 0.4), size = 6) 
 
 
 #ggplotly(graph2)
@@ -285,18 +292,27 @@ antibio_long_new |>
   group_by(most_effective) |>
   arrange(Gram_Staining) |>
   mutate(dot_y = row_number() - 0.5) |>
-  ggplot(aes(x = most_effective, fill = Gram_Staining)) +
-  geom_point(aes(y = dot_y), shape = 21, size = 5) + 
-  geom_bar(alpha = 0.2, position = position_stack(reverse = TRUE)) +
+  ggplot(aes(x = fct_relevel(most_effective, c("Neomycin", "Streptomycin", "Penicillin")))) +
+    geom_bar(aes(fill = Gram_Staining), alpha = 0.4, position = position_stack(reverse = TRUE), width = 0.7) +
+  geom_point(aes(y = dot_y, color = most_effective), size = 5) +
   #guides(fill = "none") +
   scale_fill_manual(values = c("#72ADE9", "#FDE724")) +
+  scale_color_manual(values = c("Penicillin" ="#2291A7",
+                                "Streptomycin" ="#4daf4a", 
+                                "Neomycin" = "#62117B")) +
   theme_minimal() +
+  guides(color = "none") +
   labs(title = "Which Antibiotic is most effective?",
        subtitle = "Count for each time each antibiotic was the most effective against the bacteria",
        x = "",
        y = "",
        color = "",
-       shape = "") 
+       fill = "Gram Staining") +
+  theme(legend.position = c(0.5, 0.45),
+        legend.background = element_rect(fill = "white", color = "grey35"),
+        axis.text.x = element_text(size = 11,
+                                   color = "grey10")
+        )
 
 #ggplotly(graph3)
 ```
